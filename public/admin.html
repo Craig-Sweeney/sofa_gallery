@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>沙发美术馆 - 管理后台</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo">SOFA GALLERY 管理后台</div>
+    </header>
+    <main>
+      <section class="section">
+        <div class="section-title">
+          <h2>页面布局</h2>
+          <p class="muted">调整首页标题与精选产品顺序。</p>
+        </div>
+        <div class="admin-grid">
+          <div class="details-card">
+            <div class="field">
+              <label for="admin-token">管理员口令 (X-Admin-Token)</label>
+              <input id="admin-token" type="password" placeholder="默认 dev-secret，可在环境变量修改" />
+            </div>
+            <div class="field">
+              <label for="hero-title">首页主标题</label>
+              <input id="hero-title" type="text" />
+            </div>
+            <div class="field">
+              <label for="hero-subtitle">首页副标题</label>
+              <textarea id="hero-subtitle"></textarea>
+            </div>
+            <div class="field">
+              <label for="featured-select">精选产品 (可多选调整顺序)</label>
+              <select id="featured-select" multiple size="6"></select>
+              <p class="helper">按住 Ctrl/Command 可多选，保存后更新首页顺序。</p>
+            </div>
+            <button class="button" id="save-layout">保存布局</button>
+          </div>
+
+          <div class="details-card">
+            <h3>上新产品</h3>
+            <div class="field">
+              <label>名称</label>
+              <input id="new-name" type="text" />
+            </div>
+            <div class="field">
+              <label>分类</label>
+              <select id="new-category">
+                <option value="fabric">布艺</option>
+                <option value="leather">皮艺</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>价格 (¥)</label>
+              <input id="new-price" type="number" />
+            </div>
+            <div class="field">
+              <label>尺寸</label>
+              <input id="new-size" type="text" />
+            </div>
+            <div class="field">
+              <label>描述</label>
+              <textarea id="new-desc"></textarea>
+            </div>
+            <div class="field">
+              <label>主图 URL</label>
+              <input id="new-hero" type="url" />
+            </div>
+            <div class="field">
+              <label>画廊图 URL (使用逗号分隔)</label>
+              <input id="new-gallery" type="text" />
+            </div>
+            <div class="field">
+              <label>标签 (逗号分隔)</label>
+              <input id="new-tags" type="text" />
+            </div>
+            <div class="field">
+              <label>材质 / 颜色 (名称|色值|图片 URL，每行一条)</label>
+              <textarea id="new-materials" placeholder="晨雾浅灰|#d9d9d9|https://...\n砂岩棕|#b48a6b|https://...\n"></textarea>
+              <p class="helper">缺省材质将以布艺分类呈现，可填写布艺或皮艺对应大图。</p>
+            </div>
+            <button class="button" id="create-product">发布上新</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>产品管理</h2>
+          <p class="muted">快速下架、重新上架、调整信息。</p>
+        </div>
+        <div class="details-card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>名称</th>
+                <th>分类</th>
+                <th>价格</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="product-rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <script src="/js/admin.js"></script>
+  </body>
+</html>
