@@ -1,43 +1,53 @@
 # Sofa Gallery
 
-一个简洁的沙发展示站点，包含布艺、皮艺产品主页、详情页与管理员后台。
+面向生产的前后端分离架构，提供沙发展示站点与管理员后台。前端基于 React + TypeScript + Vite，后端采用 Spring Boot + PostgreSQL，并通过 MinIO/S3 处理大图与材质资源。
 
-## 功能
-- 公共展示：主页展示精选、布艺、皮艺分类列表；详情页支持大图切换和材质色块选择。
-- 管理后台：无需登录的浏览入口，管理员可通过 `X-Admin-Token` 口令上新、下架/上架产品，并调整首页布局与精选顺序。
-- 安全措施：Helmet 安全头、速率限制、输入验证与清洗，限制 JSON 请求大小。
+## 架构概览
+- `frontend/`：Vite + React + TypeScript，包含首页、产品详情与管理员后台界面，统一浅灰极简主题与响应式布局。
+- `backend/`：Spring Boot 应用，模块化划分 auth/catalog/layout/media，预留 OTP 登录、产品与布局管理、对象存储签名接口。
+- 数据层：PostgreSQL 存储管理员、产品、变体与布局配置；MinIO（S3 兼容）保存封面、详情与材质贴图。
+- 部署：独立 Dockerfile，`docker-compose` 联动数据库、对象存储、后端与前端静态资源；Nginx 反代 API，添加基础安全头。
 
-## 快速开始
-1. 安装依赖：
+## 快速开始（本地）
+1. 准备环境变量
+   - 前端：复制 `frontend/.env.example` 为 `.env`，设置 `VITE_API_BASE_URL`。
+   - 后端：在 `backend/src/main/resources/application.yml` 覆盖数据库、S3、JWT、OTP 等配置，或通过环境变量注入。
+2. 本地开发
    ```bash
-   npm install
+   cd frontend && npm install && npm run dev # Vite 开发模式
+   cd backend && ./mvnw spring-boot:run       # 或 mvn spring-boot:run
    ```
-2. 运行开发服务器（默认端口 3000）：
-   ```bash
-   npm start
-   ```
-3. 访问：
-   - 主页：`http://localhost:3000/`
-   - 详情页：`http://localhost:3000/product.html?id=<productId>`
-   - 管理后台：`http://localhost:3000/admin.html`
+3. 访问入口
+   - 前台：`http://localhost:5173/`
+   - 产品详情：`http://localhost:5173/products/:id`
+   - 管理后台：`http://localhost:5173/admin`
 
-### 管理员口令
-- 默认口令：`dev-secret`，通过请求头 `X-Admin-Token` 传递。
-- 可在启动时设置环境变量覆盖：
-  ```bash
-  ADMIN_TOKEN="your-strong-secret" npm start
-  ```
+## 容器化运行
+```bash
+docker compose up --build
+```
+服务端口：
+- 前端：`http://localhost:3000`
+- 后端 API：`http://localhost:8080/api`
+- PostgreSQL：`localhost:5432`
+- MinIO 控制台：`http://localhost:9001`
 
-### API 概览
-- `GET /api/products` 列出在架产品。
-- `GET /api/products?includeInactive=1` 列出全部产品（后台使用）。
-- `GET /api/products/:id` 获取产品详情。
-- `POST /api/products` 创建产品（需 `X-Admin-Token`）。
-- `PATCH /api/products/:id/status` 上架/下架产品（需 `X-Admin-Token`）。
-- `PUT /api/layout` 更新首页标题、副标题、精选顺序（需 `X-Admin-Token`）。
+## 目录说明
+- `frontend/src/pages`：HomePage、ProductDetailPage、Login/Admin 控制台，覆盖分类栅格、轮播/变体切换、布局配置等界面。
+- `frontend/src/components`：复用组件（SofaCategoryGrid、ProductCard、ColorSwatchSelector、MaterialInfoPanel、LayoutConfigPanel）。
+- `backend/src/main/java/com/sofa/gallery`：Spring Boot 启动、Security 配置、基础 Controller（OTP、产品、布局、媒体签名）。
+- `docker-compose.yml`：PostgreSQL + MinIO + 后端 + 前端一体化启动。
 
-## 测试
-- 基础语法校验：
-  ```bash
-  npm test
-  ```
+## 安全与运维要点
+- 默认开启内容安全策略、基础安全响应头与 API 鉴权占位；JWT 秘钥与数据库口令需通过环境变量注入。
+- OTP 登录应接入短信/邮箱网关并实现频率限制、验证码重试策略；当前代码仅为接口骨架。
+- 对象存储上传需校验文件类型/尺寸，生成短时直传凭证并记录回调。
+- 建议在 CI 中加入构建与依赖扫描，镜像推送后结合 Ingress/Nginx 完成 HTTPS、限流与 WAF 代理。
+
+## 后续待办
+- `setup-env`：完善环境变量注入、Secrets 管理与配置中心集成。
+- `frontend-ui`：接入真实产品/布局 API，丰富组件状态与无障碍支持。
+- `admin-panel`：完成上/下架、排序、图片上传与拖拽布局配置。
+- `backend-api`：补全实体建模、仓储、服务层与鉴权过滤器，接入 OTP 网关与 S3 回调。
+- `security-deploy`：Nginx/Ingress 生产化配置、速率限制、DDOS 缓解方案。
+- `testing-docs`：补充自动化测试矩阵与接口契约校验。
