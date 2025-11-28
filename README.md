@@ -44,10 +44,12 @@ docker compose up --build
 - 对象存储上传需校验文件类型/尺寸，生成短时直传凭证并记录回调。
 - 建议在 CI 中加入构建与依赖扫描，镜像推送后结合 Ingress/Nginx 完成 HTTPS、限流与 WAF 代理。
 
+## 已完成
+- `backend-api`：补全了实体建模、内存仓储、服务层与基于管理 Token 的鉴权过滤器，实现产品、布局与媒体上传预签名的基础接口。
+- `testing-docs`：通过 Spring Boot 集成测试覆盖 OTP 验证、产品上架、布局更新与媒体上传校验，为后续契约校验提供示例。
+
 ## 后续待办
 - `setup-env`：完善环境变量注入、Secrets 管理与配置中心集成。
 - `frontend-ui`：接入真实产品/布局 API，丰富组件状态与无障碍支持。
 - `admin-panel`：完成上/下架、排序、图片上传与拖拽布局配置。
-- `backend-api`：补全实体建模、仓储、服务层与鉴权过滤器，接入 OTP 网关与 S3 回调。
 - `security-deploy`：Nginx/Ingress 生产化配置、速率限制、DDOS 缓解方案。
-- `testing-docs`：补充自动化测试矩阵与接口契约校验。
