@@ -1,0 +1,26 @@
+{
+  "name": "sofa_gallery",
+  "version": "1.0.0",
+  "description": "Sofa gallery with public catalog and admin console",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "lint": "node --check src/server.js && node --check public/js/main.js && node --check public/js/product.js && node --check public/js/admin.js",
+    "test": "npm run lint"
+  },
+  "keywords": ["sofa", "gallery", "admin"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "compression": "^1.7.4",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.1.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
