@@ -1,28 +1,39 @@
 package com.sofa.gallery.layout;
 
+import com.sofa.gallery.layout.entity.LayoutConfig;
+import com.sofa.gallery.layout.entity.LayoutSection;
+import com.sofa.gallery.layout.service.LayoutService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
 public class LayoutController {
-    private Map<String, Object> layout = Map.of(
-            "heroTitle", "沉浸式舒适体验",
-            "heroSubtitle", "精选布艺与皮艺系列，满足客厅每一寸的格调与舒适",
-            "sections", List.of()
-    );
+    private final LayoutService layoutService;
+
+    public LayoutController(LayoutService layoutService) {
+        this.layoutService = layoutService;
+    }
 
     @GetMapping("/layout")
     public ResponseEntity<?> getLayout() {
-        return ResponseEntity.ok(layout);
+        return ResponseEntity.ok(layoutService.currentLayout());
     }
 
     @PutMapping("/admin/layout")
-    public ResponseEntity<?> updateLayout(@RequestBody Map<String, Object> payload) {
-        this.layout = payload;
-        return ResponseEntity.ok(this.layout);
+    public ResponseEntity<?> updateLayout(@Valid @RequestBody LayoutRequest payload) {
+        LayoutConfig config = new LayoutConfig(payload.heroTitle(), payload.heroSubtitle(),
+                payload.sections().stream()
+                        .map(section -> new LayoutSection(section.id(), section.title(), section.description()))
+                        .toList());
+        return ResponseEntity.ok(layoutService.updateLayout(config));
     }
+
+    public record LayoutRequest(@NotBlank String heroTitle, @NotBlank String heroSubtitle, List<LayoutSectionRequest> sections) {}
+
+    public record LayoutSectionRequest(@NotBlank String id, @NotBlank String title, @NotBlank String description) {}
 }

@@ -1,49 +1,67 @@
 package com.sofa.gallery.catalog;
 
+import com.sofa.gallery.catalog.entity.Product;
+import com.sofa.gallery.catalog.entity.ProductVariant;
+import com.sofa.gallery.catalog.service.CatalogService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
 public class CatalogController {
+    private final CatalogService catalogService;
+
+    public CatalogController(CatalogService catalogService) {
+        this.catalogService = catalogService;
+    }
 
     @GetMapping("/products")
     public ResponseEntity<?> listProducts() {
-        // 示例数据，生产中应查询数据库
-        var sample = List.of(
-                Map.of(
-                        "id", "demo-1",
-                        "name", "云感布艺沙发",
-                        "category", "fabric",
-                        "description", "柔软坐垫与模块化靠背，适合北欧/极简风格。",
-                        "basePrice", BigDecimal.valueOf(8999),
-                        "featured", true,
-                        "variants", List.of()
-                )
-        );
-        return ResponseEntity.ok(sample);
+        return ResponseEntity.ok(catalogService.listProducts());
     }
 
     @GetMapping("/products/{id}")
     public ResponseEntity<?> productDetail(@PathVariable String id) {
-        return ResponseEntity.ok(Map.of(
-                "id", id,
-                "name", "云感布艺沙发",
-                "category", "fabric",
-                "description", "柔软坐垫与模块化靠背，适合北欧/极简风格。",
-                "basePrice", BigDecimal.valueOf(8999),
-                "featured", true,
-                "variants", List.of()
-        ));
+        return ResponseEntity.ok(catalogService.getProduct(id));
     }
 
     @PostMapping("/admin/products")
-    public ResponseEntity<?> upsertProduct(@RequestBody Map<String, Object> payload) {
-        // TODO: 保存产品、颜色/材质、图片等
-        return ResponseEntity.ok(payload);
+    public ResponseEntity<?> upsertProduct(@Valid @RequestBody ProductRequest payload) {
+        Product product = new Product(
+                payload.id(),
+                payload.name(),
+                payload.category(),
+                payload.description(),
+                payload.basePrice(),
+                payload.featured(),
+                payload.variants().stream()
+                        .map(v -> new ProductVariant(v.id(), v.color(), v.material(), v.priceModifier(), v.imageUrl()))
+                        .toList()
+        );
+        return ResponseEntity.ok(catalogService.upsert(product));
     }
+
+    public record ProductRequest(
+            @NotBlank String id,
+            @NotBlank String name,
+            @NotBlank String category,
+            @NotBlank String description,
+            @NotNull BigDecimal basePrice,
+            boolean featured,
+            @NotNull List<ProductVariantRequest> variants
+    ) {}
+
+    public record ProductVariantRequest(
+            @NotBlank String id,
+            @NotBlank String color,
+            @NotBlank String material,
+            BigDecimal priceModifier,
+            @NotBlank String imageUrl
+    ) {}
 }
