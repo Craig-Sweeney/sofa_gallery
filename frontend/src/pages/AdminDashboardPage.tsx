@@ -11,6 +11,7 @@ const AdminDashboardPage = () => {
   const { data: layout, refetch: refetchLayout } = useQuery({ queryKey: ['layout'], queryFn: fetchLayout });
 
   const [form, setForm] = useState<Partial<SofaProduct>>({
+    id: '',
     name: '',
     category: 'fabric',
     description: '',
@@ -71,6 +72,15 @@ const AdminDashboardPage = () => {
       <div className="card">
         <div className="form-grid">
           <label>
+            产品 ID/编码
+            <input
+              className="input"
+              value={form.id}
+              onChange={(e) => setForm({ ...form, id: e.target.value })}
+              placeholder="例如：cloud-fabric-01"
+            />
+          </label>
+          <label>
             名称
             <input className="input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </label>
@@ -106,7 +116,16 @@ const AdminDashboardPage = () => {
             />
             设为精选
           </label>
-          <button className="button" onClick={() => productMutation.mutate(form)}>提交产品</button>
+          <button
+            className="button"
+            onClick={() => {
+              const normalizedId = (form.id || form.name || '').trim().toLowerCase().replace(/\s+/g, '-');
+              productMutation.mutate({ ...form, id: normalizedId });
+            }}
+            disabled={!form.name}
+          >
+            提交产品
+          </button>
         </div>
       </div>
 

@@ -21,12 +21,24 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token = request.getHeader("X-Admin-Token");
+        String token = extractToken(request);
         if (token != null && authService.isTokenActive(token)) {
             var authentication = new UsernamePasswordAuthenticationToken("admin", token, null);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
         filterChain.doFilter(request, response);
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        String headerToken = request.getHeader("X-Admin-Token");
+        if (headerToken != null && !headerToken.isBlank()) {
+            return headerToken;
+        }
+        String authorization = request.getHeader("Authorization");
+        if (authorization != null && authorization.toLowerCase().startsWith("bearer ")) {
+            return authorization.substring(7);
+        }
+        return null;
     }
 }
