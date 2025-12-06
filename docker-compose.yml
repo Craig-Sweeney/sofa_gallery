@@ -1,5 +1,4 @@
 name: sofa-gallery-dev
-version: "3.9"
 
 x-env-file: &env_file
   - .env
